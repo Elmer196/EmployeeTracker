@@ -85,14 +85,51 @@ const addEmployee = [
         type: "list",
         name: "employeeManager",
         message: "Who is this employee's manager?",
-        choices: ["None",
-                  "Bill Gates",
+        choices: ["Bill Gates",
                   "Elmer Hernandez",
                   "Elon Musk",
                   "Mark Zuckerberg",
                  ]
     },
 
+
+]
+
+const deleteEmployee = [
+    {
+        type: "input",
+        name: "employeeDelete",
+        message: "What is the first name of the employee you'd like to delete?",
+    }
+]
+
+const managerPrompt = [
+
+    {
+        type: "list",
+        name: "managerName",
+        message: "Which manager would you like to sort by?",
+        choices: ["Bill Gates",
+                  "Elmer Hernandez",
+                  "Elon Musk",
+                  "Mark Zuckerberg",
+                 ]
+    }
+
+]
+
+const departmentPrompt = [
+
+    {
+        type: "list",
+        name: "departmentName",
+        message: "Which manager would you like to sort by?",
+        choices: ["Engineering",
+                  "Finance",
+                  "Legal",
+                  "Sales",
+                 ]
+    }
 
 ]
 
@@ -103,6 +140,7 @@ function viewEmployee(){
             throw error 
         }
         console.table(result);
+        connection.end();
     })
 }
 
@@ -112,11 +150,57 @@ function createEmployee(){
             if(error){
                 throw error 
             }
+            connection.end();
         })
 
 
     })
 }
+
+
+function deletePerson(){
+    inquirer.prompt(deleteEmployee).then(deleteInfo => {
+        connection.query(`DELETE FROM workplace.employees WHERE (FirstName = '${deleteInfo.employeeDelete}')`, function(error, result){
+            if(error){
+                throw error 
+            }
+            connection.end();
+        })
+
+
+    })
+}
+
+function viewManager(){
+    inquirer.prompt(managerPrompt).then(managerInfo => {
+        connection.query(`SELECT department.ID, employees.FirstName, employees.LastName, department.Manager FROM department INNER JOIN employees ON department.Manager=employees.Manager WHERE department.Manager="${managerInfo.managerName}"`, function(error, result){
+            if(error){
+                throw error 
+            }
+
+            console.table(result);
+            connection.end();
+        })
+
+
+    })
+}
+
+function viewDepartment(){
+    inquirer.prompt(departmentPrompt).then(departmentInfo => {
+        connection.query(`SELECT department.ID, employees.FirstName, employees.LastName, department.Name FROM department INNER JOIN employees ON department.Roles=employees.Role WHERE department.Name="${departmentInfo.departmentName}"`, function(error, result){
+            if(error){
+                throw error 
+            }
+
+            console.table(result);
+            connection.end();
+        })
+
+
+    })
+}
+
 
 
 
@@ -129,6 +213,14 @@ async function init(){
 
             else if(employeeAdder.start == "Add Employee"){
                 createEmployee();
+            }
+
+            else if(employeeAdder.start == "Remove Employee"){
+                deletePerson();
+            }
+
+            else if(employeeAdder.start == "View All Employees By Manager"){
+                viewManager();
             }
             return true;
 
